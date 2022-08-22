@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: GPL-3.0
+
+pragma solidity >=0.7.0 <0.9.0;
+
+contract funding{
+    address owner;
+
+    constructor() {
+        owner =msg.sender = owner;
+    }
+
+    struct funder_details{
+        address funder;
+        uint fund_amount;
+        uint date;
+    }
+
+    funder_details[] funders;
+
+    function fund() public payable{
+        require(msg.value>0,"cannot fund zero amount");
+        funders.push(funder_details(msg.sender, msg.value, block.timestamp));
+    }
+
+    function withdraw() public payable{
+        require(msg.sender==owner,"You are not the owner.");
+        uint length = funders.length;
+        for(uint i = 0; i < length; i ++ ){
+            if(block.timestamp > funders[i].date + 172800){
+                payable(funders[i].funder).transfer(funders[i].fund_amount);
+                delete funders[i].fund_amount;
+            }
+            else{
+                payable(owner).transfer(funders[i].fund_amount);
+                delete funders[i].fund_amount;
+            }
+        }
+    }
+
+
+
+}
